@@ -6,12 +6,11 @@
 **Professor:** Dr. Marcel Stefan Wagner
 
 **Integrantes do grupo (nome e RM):**
-> ⚠️ *Preencha aqui com o nome completo e RM de todos os integrantes do grupo.*
-- Nome Completo – RM 000000
+- Gabriel Cabral Mendes Mariano – RM 563230
 
 **IDE utilizada:** IntelliJ IDEA
 
-**Link do repositório GitHub:** https://github.com/GabrielCabralmm/CP-2Semestre-Java/tree/main/mercado-express
+**Link do repositório GitHub:** https://github.com/GabrielCabralmm/CP-2Semestre-Java
 
 **Link do Deploy (produção):** https://cp-2semestre-java.onrender.com
 
@@ -114,17 +113,11 @@ spring.jpa.show-sql=false
 são configuradas no painel de Environment Variables do serviço, sem nunca aparecerem no
 código-fonte ou no repositório.
 
-![SQL Developer - Tabela TDS_TB_MERCADO](docs/img/sql-developer.png)
-> ⚠️ *Ainda preciso do print do SQL Developer conectado ao ORACLE_FIAP mostrando a tabela
-> TDS_TB_MERCADO. Salve o arquivo como `docs/img/sql-developer.png`.*
-
 ---
 
 ## 4. Configuração do Spring Initializr
 
-![Spring Initializr - Configuração final](docs/img/spring-initializr.png)
-> ⚠️ *Salve o print definitivo do Spring Initializr (Group com.fiap / Artifact mercado-express)
-> como `docs/img/spring-initializr.png`.*
+![Spring Initializr - Configuração final](images/printSpring.webp)
 
 Configuração utilizada:
 - **Project:** Maven | **Language:** Java | **Spring Boot:** 4.1.0
@@ -191,7 +184,7 @@ Cria um novo produto.
 }
 ```
 
-![POST /mercado - Criação de produto](docs/img/01-post-create.png)
+![POST /mercado - Criação de produto](images/01-post-create.png)
 
 ---
 
@@ -222,7 +215,7 @@ Cria um novo produto.
 }
 ```
 
-![GET /mercado - Listar todos](docs/img/02-get-listar.png)
+![GET /mercado - Listar todos](images/02-get-listar.png)
 
 ---
 
@@ -233,7 +226,7 @@ Exemplo: `GET https://cp-2semestre-java.onrender.com/mercado/1`
 **Response (200 OK):** mesma estrutura do item 5.1, com os links `self`, `mercado`,
 `atualizar`, `atualizar-parcial` e `deletar`.
 
-![GET /mercado/{id} - Buscar por id](docs/img/03-get-por-id.png)
+![GET /mercado/{id} - Buscar por id](images/03-get-por-id.png)
 
 ---
 
@@ -254,8 +247,7 @@ Exemplo: `PUT https://cp-2semestre-java.onrender.com/mercado/{id}`
 
 **Response (200 OK):** produto atualizado, com os respectivos links HATEOAS.
 
-![PUT /mercado/{id} - Atualização completa](docs/img/04-put.png)
-> ⚠️ *Substitua pelo nome real do arquivo se você salvar o print do PUT com outro nome — você já testou esse endpoint com sucesso, só falta me mandar o print pra eu confirmar.*
+![PUT /mercado/{id} - Atualização completa](images/04-put.png)
 
 ---
 
@@ -272,7 +264,7 @@ Exemplo: `PATCH https://cp-2semestre-java.onrender.com/mercado/{id}`
 
 **Response (200 OK):** produto atualizado apenas no campo `preco`.
 
-![PATCH /mercado/{id} - Atualização parcial](docs/img/05-patch.png)
+![PATCH /mercado/{id} - Atualização parcial](images/05-patch.png)
 
 ---
 
@@ -282,7 +274,7 @@ Exemplo: `DELETE https://cp-2semestre-java.onrender.com/mercado/{id}`
 
 **Response:** `204 No Content` (produto removido do banco pelo ID).
 
-![DELETE /mercado/{id} - Remoção de produto](docs/img/06-delete.png)
+![DELETE /mercado/{id} - Remoção de produto](images/06-delete.png)
 
 ---
 
