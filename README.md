@@ -9,17 +9,17 @@
 > ⚠️ *Preencha aqui com o nome completo e RM de todos os integrantes do grupo.*
 - Nome Completo – RM 000000
 
-**IDE utilizada:**
-> ⚠️ *Indique aqui: IntelliJ, Eclipse ou NetBeans.*
+**IDE utilizada:** IntelliJ IDEA
 
-**Link do Deploy:**
-> ⚠️ *Cole aqui o link da aplicação publicada (Render, Railway, Heroku, etc.).*
+**Link do repositório GitHub:** https://github.com/GabrielCabralmm/CP-2Semestre-Java/tree/main/mercado-express
+
+**Link do Deploy (produção):** https://cp-2semestre-java.onrender.com
 
 ---
 
 ## 1. Descrição do projeto
 
-API REST desenvolvida com **Spring Boot (Maven / Java)** para uma empresa do tipo
+API REST desenvolvida com **Spring Boot 4.1.0 (Maven / Java 17)** para uma empresa do tipo
 **"mercado express"** (venda de itens como meias, produtos de limpeza, frutas, etc.).
 
 A aplicação:
@@ -33,7 +33,10 @@ A aplicação:
 - Retorna as respostas seguindo o padrão **HATEOAS**, no **nível de maturidade 3** do
   Modelo de Maturidade de Richardson — cada recurso retornado traz links (`self`, `mercado`,
   `atualizar`, `atualizar-parcial`, `deletar`) que indicam as próximas ações possíveis.
-- Roda no **Tomcat embutido, na porta 8082**.
+- Roda no **Tomcat embutido, na porta 8082** localmente (em produção, a porta é definida
+  automaticamente pela plataforma de deploy via variável de ambiente `PORT`).
+- Está publicada em produção via **Docker** (Render), com as credenciais do banco
+  configuradas por variáveis de ambiente (nunca commitadas no código).
 
 ### Arquitetura (fluxo de dados)
 
@@ -46,6 +49,9 @@ Postman/Insomnia (JSON) <--HTTP--> Controller (Spring) <--Persist--> Repository/
 ```
 mercado-express/
 ├── pom.xml
+├── Dockerfile                              -> build/deploy em produção (Render)
+├── Dockerfile.vercel                       -> variante para deploy alternativo na Vercel
+├── postman/mercado-express.postman_collection.json  -> coleção de testes pronta
 ├── src/main/java/com/fiap/mercadoexpress/
 │   ├── MercadoExpressApplication.java      -> classe main
 │   ├── model/Mercado.java                  -> entidade JPA (com Lombok)
@@ -53,7 +59,9 @@ mercado-express/
 │   ├── controller/MercadoController.java   -> endpoints REST (CRUD) /mercado
 │   ├── assembler/MercadoModelAssembler.java-> monta os links HATEOAS
 │   └── exception/                          -> tratamento de erros (404)
-└── src/main/resources/application.properties -> configuração do datasource Oracle e porta 8082
+└── src/main/resources/
+    ├── application.properties              -> configuração via variáveis de ambiente
+    └── application.properties.example      -> modelo para rodar localmente
 ```
 
 ---
@@ -61,7 +69,7 @@ mercado-express/
 ## 2. Tabela no banco de dados
 
 Tabela: **TDS_TB_MERCADO** (banco `ORACLE_FIAP`, criada automaticamente pelo Hibernate
-via `spring.jpa.hibernate.ddl-auto=update`, configurado em `application.properties`).
+via `spring.jpa.hibernate.ddl-auto=update`).
 
 | Coluna  | Tipo (Java)  | Descrição              |
 |---------|--------------|-------------------------|
@@ -76,32 +84,51 @@ via `spring.jpa.hibernate.ddl-auto=update`, configurado em `application.properti
 
 ## 3. Configuração da conexão com o Oracle
 
-No arquivo `src/main/resources/application.properties`, substitua as credenciais pelas
-suas do laboratório Oracle FIAP:
+Por segurança, o `application.properties` **não contém credenciais reais** — ele lê tudo
+de variáveis de ambiente, tanto localmente quanto em produção:
 
 ```properties
-server.port=8082
+server.port=${PORT:8082}
+server.address=0.0.0.0
 
-spring.datasource.url=jdbc:oracle:thin:@oracle.fiap.com.br:1521:ORCL
-spring.datasource.username=SEU_RM_AQUI
-spring.datasource.password=SUA_SENHA_AQUI
+spring.datasource.url=${DB_URL}
+spring.datasource.username=${DB_USERNAME}
+spring.datasource.password=${DB_PASSWORD}
 spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
 
 spring.jpa.database-platform=org.hibernate.dialect.OracleDialect
 spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
+spring.jpa.show-sql=false
 ```
 
-> ⚠️ *Insira aqui um print da tela do SQL Developer conectado ao ORACLE_FIAP mostrando
-> a tabela TDS_TB_MERCADO criada/populada.*
+**Para rodar localmente:**
+1. Copie `src/main/resources/application.properties.example` para `application.properties`
+   (esse arquivo real fica de fora do Git, propositalmente).
+2. Ou, mais simples: configure as 3 variáveis de ambiente na sua IDE (Run Configuration
+   do IntelliJ) antes de rodar:
+   - `DB_URL` → `jdbc:oracle:thin:@oracle.fiap.com.br:1521:ORCL`
+   - `DB_USERNAME` → seu RM do Oracle FIAP
+   - `DB_PASSWORD` → sua senha do Oracle FIAP
+
+**Em produção (Render):** as mesmas 3 variáveis (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`)
+são configuradas no painel de Environment Variables do serviço, sem nunca aparecerem no
+código-fonte ou no repositório.
+
+![SQL Developer - Tabela TDS_TB_MERCADO](docs/img/sql-developer.png)
+> ⚠️ *Ainda preciso do print do SQL Developer conectado ao ORACLE_FIAP mostrando a tabela
+> TDS_TB_MERCADO. Salve o arquivo como `docs/img/sql-developer.png`.*
 
 ---
 
 ## 4. Configuração do Spring Initializr
 
-> ⚠️ *Insira aqui o print (.jpg/.jpeg/.png) da configuração final do Spring Initializr,
-> conforme exigido no enunciado, mostrando: Maven, Java, Spring Boot, e as dependências
-> Spring Web, Spring Data JPA, Spring HATEOAS, Lombok, Oracle Driver, Validation.*
+![Spring Initializr - Configuração final](docs/img/spring-initializr.png)
+> ⚠️ *Salve o print definitivo do Spring Initializr (Group com.fiap / Artifact mercado-express)
+> como `docs/img/spring-initializr.png`.*
+
+Configuração utilizada:
+- **Project:** Maven | **Language:** Java | **Spring Boot:** 4.1.0
+- **Group:** com.fiap | **Artifact:** mercado-express | **Java:** 17
 
 Dependências utilizadas (`pom.xml`):
 - Spring Web
@@ -116,7 +143,19 @@ Dependências utilizadas (`pom.xml`):
 
 ## 5. Documentação dos endpoints (CRUD)
 
-Base URL de testes: **http://localhost:8082**
+> ⚠️ **Atenção ao testar:**
+> - A aplicação está publicada no plano gratuito do Render, que "dorme" após 15 minutos de
+>   inatividade. A primeira requisição após esse período pode levar de 30 a 90 segundos
+>   para responder — isso é comportamento esperado, não é erro.
+> - Antes de testar GET por id, PUT, PATCH ou DELETE, rode primeiro o `GET /mercado` para
+>   verificar quais ids existem atualmente no banco, já que produtos de testes anteriores
+>   podem ter sido removidos.
+> - A coleção pronta do Postman está em `postman/mercado-express.postman_collection.json`,
+>   já com a variável `base_url` configurável e `mercado_id` para reaproveitar entre os testes.
+
+Base URL de testes:
+- **Local:** `http://localhost:8082`
+- **Produção:** `https://cp-2semestre-java.onrender.com`
 
 ### 5.1. CREATE — `POST /mercado`
 
@@ -143,16 +182,16 @@ Cria um novo produto.
   "tamanho": "500ml",
   "preco": 3.99,
   "_links": {
-    "self": { "href": "http://localhost:8082/mercado/1" },
-    "mercado": { "href": "http://localhost:8082/mercado" },
-    "atualizar": { "href": "http://localhost:8082/mercado/1" },
-    "atualizar-parcial": { "href": "http://localhost:8082/mercado/1" },
-    "deletar": { "href": "http://localhost:8082/mercado/1" }
+    "self": { "href": "https://cp-2semestre-java.onrender.com/mercado/1" },
+    "mercado": { "href": "https://cp-2semestre-java.onrender.com/mercado" },
+    "atualizar": { "href": "https://cp-2semestre-java.onrender.com/mercado/1" },
+    "atualizar-parcial": { "href": "https://cp-2semestre-java.onrender.com/mercado/1" },
+    "deletar": { "href": "https://cp-2semestre-java.onrender.com/mercado/1" }
   }
 }
 ```
 
-> ⚠️ *Insira aqui o print do Postman/Insomnia mostrando o POST e a resposta acima.*
+![POST /mercado - Criação de produto](docs/img/01-post-create.png)
 
 ---
 
@@ -171,36 +210,36 @@ Cria um novo produto.
         "tamanho": "500ml",
         "preco": 3.99,
         "_links": {
-          "self": { "href": "http://localhost:8082/mercado/1" },
-          "mercado": { "href": "http://localhost:8082/mercado" }
+          "self": { "href": "https://cp-2semestre-java.onrender.com/mercado/1" },
+          "mercado": { "href": "https://cp-2semestre-java.onrender.com/mercado" }
         }
       }
     ]
   },
   "_links": {
-    "self": { "href": "http://localhost:8082/mercado" }
+    "self": { "href": "https://cp-2semestre-java.onrender.com/mercado" }
   }
 }
 ```
 
-> ⚠️ *Insira aqui o print do Postman/Insomnia mostrando o GET /mercado.*
+![GET /mercado - Listar todos](docs/img/02-get-listar.png)
 
 ---
 
 ### 5.3. READ (buscar por id) — `GET /mercado/{id}`
 
-Exemplo: `GET http://localhost:8082/mercado/1`
+Exemplo: `GET https://cp-2semestre-java.onrender.com/mercado/1`
 
 **Response (200 OK):** mesma estrutura do item 5.1, com os links `self`, `mercado`,
 `atualizar`, `atualizar-parcial` e `deletar`.
 
-> ⚠️ *Insira aqui o print do Postman/Insomnia mostrando o GET /mercado/1.*
+![GET /mercado/{id} - Buscar por id](docs/img/03-get-por-id.png)
 
 ---
 
 ### 5.4. UPDATE (completo) — `PUT /mercado/{id}`
 
-Exemplo: `PUT http://localhost:8082/mercado/1`
+Exemplo: `PUT https://cp-2semestre-java.onrender.com/mercado/{id}`
 
 **Request Body (JSON):**
 ```json
@@ -215,13 +254,14 @@ Exemplo: `PUT http://localhost:8082/mercado/1`
 
 **Response (200 OK):** produto atualizado, com os respectivos links HATEOAS.
 
-> ⚠️ *Insira aqui o print do Postman/Insomnia mostrando o PUT.*
+![PUT /mercado/{id} - Atualização completa](docs/img/04-put.png)
+> ⚠️ *Substitua pelo nome real do arquivo se você salvar o print do PUT com outro nome — você já testou esse endpoint com sucesso, só falta me mandar o print pra eu confirmar.*
 
 ---
 
 ### 5.5. UPDATE (parcial) — `PATCH /mercado/{id}`
 
-Exemplo: `PATCH http://localhost:8082/mercado/1`
+Exemplo: `PATCH https://cp-2semestre-java.onrender.com/mercado/{id}`
 
 **Request Body (JSON):** apenas os campos que deseja alterar.
 ```json
@@ -232,17 +272,17 @@ Exemplo: `PATCH http://localhost:8082/mercado/1`
 
 **Response (200 OK):** produto atualizado apenas no campo `preco`.
 
-> ⚠️ *Insira aqui o print do Postman/Insomnia mostrando o PATCH.*
+![PATCH /mercado/{id} - Atualização parcial](docs/img/05-patch.png)
 
 ---
 
 ### 5.6. DELETE — `DELETE /mercado/{id}`
 
-Exemplo: `DELETE http://localhost:8082/mercado/1`
+Exemplo: `DELETE https://cp-2semestre-java.onrender.com/mercado/{id}`
 
 **Response:** `204 No Content` (produto removido do banco pelo ID).
 
-> ⚠️ *Insira aqui o print do Postman/Insomnia mostrando o DELETE.*
+![DELETE /mercado/{id} - Remoção de produto](docs/img/06-delete.png)
 
 ---
 
@@ -261,17 +301,27 @@ Spring HATEOAS para gerar os links dinamicamente a partir dos métodos do `Merca
 
 ## 7. Como executar localmente
 
-1. Configure as credenciais do Oracle em `src/main/resources/application.properties`.
-2. Rode o projeto:
+1. Configure as variáveis de ambiente `DB_URL`, `DB_USERNAME` e `DB_PASSWORD` (veja Seção 3).
+2. Rode o projeto pela IDE (botão ▶ na classe `MercadoExpressApplication`) ou, se tiver
+   o Maven instalado globalmente:
    ```bash
    mvn spring-boot:run
    ```
 3. A API estará disponível em `http://localhost:8082/mercado`.
-4. Importe/teste os endpoints acima no Postman ou Insomnia.
+4. Importe a coleção `postman/mercado-express.postman_collection.json` no Postman e teste
+   os endpoints da Seção 5.
 
 ---
 
 ## 8. Deploy
 
-> ⚠️ *Descreva aqui a plataforma escolhida para o deploy (ex.: Render, Railway, Heroku)
-> e o passo a passo realizado, junto com o link final de acesso à aplicação publicada.*
+A aplicação foi publicada no **Render**, utilizando um `Dockerfile` multi-stage (build com
+Maven + execução com JRE 17) presente na raiz do repositório. As credenciais do banco Oracle
+foram configuradas como variáveis de ambiente (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`) direto
+no painel do Render, nunca ficando expostas no código-fonte.
+
+**Link de produção:** https://cp-2semestre-java.onrender.com
+
+> Observação: por ser um plano gratuito, a instância "dorme" após 15 minutos de inatividade
+> e pode levar até 90 segundos para responder à primeira requisição depois de um período
+> parado. Isso é esperado e não indica falha na aplicação.
